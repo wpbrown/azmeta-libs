@@ -2,35 +2,27 @@ from azure.common.client_factory import get_client_from_cli_profile
 from azure.mgmt.resourcegraph import ResourceGraphClient
 from azure.mgmt.resourcegraph.models import QueryRequest, QueryRequestOptions, QueryResponse, ResultTruncated
 from typing import List, Iterable, Tuple, Any
-from azure.loganalytics.models import QueryBody, QueryResults
-from azure.kusto.data.response import KustoResponseDataSetV1, KustoResponseDataSet
-from azure.kusto.data.helpers import dataframe_from_result_table
-from .utils.types import realize_sequence
-from .kusto import KustoDataFrameResponse, KustoColumnDescriptor, kusto_data_to_dataframe
-import pandas
+from pandas import DataFrame
 import itertools
 
-
-def query_kusto(subscriptions: Iterable[str], query: str, max_pages = 10) -> KustoResponseDataSet:
-    responses = _query_native(subscriptions, query, max_pages)
-
-    column_data = [{'ColumnName': c['name'], 'ColumnType': c['type']} for c in responses[0].data['columns']]
-    row_data = list(itertools.chain(r.data['rows'] for r in responses))
-    json_data = { 'Tables': [{ 'TableName': 'PrimaryResult', 'Rows': row_data, 'Columns': column_data}] }
-
-    return KustoResponseDataSetV1(json_data)
+from .utils.types import realize_sequence
+from .kusto import KustoColumnDescriptor, kusto_data_to_dataframe
 
 
-def query_dataframe(subscriptions: Iterable[str], query: str, max_pages = 10) -> KustoDataFrameResponse:
+def query_native(subscriptions: Iterable[str], query: str, max_pages = 10) -> List[QueryResponse]:
+    return _query_native(subscriptions, query, max_pages)
+
+
+def query_dataframe(subscriptions: Iterable[str], query: str, max_pages = 10) -> DataFrame:
     responses = _query_native(subscriptions, query, max_pages)
     
-    columns = [KustoColumnDescriptor(c['name'], _RESOURCE_GRAPH_TO_KQL_TYPE_MAP[c['type']]) for c in responses[0].data['columns']]
+    columns = [KustoColumnDescriptor(c['name'], _RESOURCE_GRAPH_TO_KUSTO_TYPE_MAP[c['type']]) for c in responses[0].data['columns']]
     rows = itertools.chain.from_iterable(r.data['rows'] for r in responses)
 
-    return KustoDataFrameResponse([kusto_data_to_dataframe(columns, rows)])
+    return kusto_data_to_dataframe(columns, rows)
 
 
-_RESOURCE_GRAPH_TO_KQL_TYPE_MAP = {
+_RESOURCE_GRAPH_TO_KUSTO_TYPE_MAP = {
     'number': 'real',
     'integer': 'long',
     'object': 'dynamic',
@@ -38,7 +30,7 @@ _RESOURCE_GRAPH_TO_KQL_TYPE_MAP = {
 }
 
 
-def _query_native(subscriptions: Iterable[str], query: str, max_pages = 10) -> List[QueryResponse]:
+def _query_native(subscriptions: Iterable[str], query: str, max_pages) -> List[QueryResponse]:
     client = get_client_from_cli_profile(ResourceGraphClient)
     query_options = QueryRequestOptions()
     query_request = QueryRequest(subscriptions=realize_sequence(subscriptions), query=query, options=query_options)
