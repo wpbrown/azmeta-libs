@@ -23,7 +23,7 @@ class CustomCssPreprocessor(Preprocessor):
         return nb, resources
 
 
-def export_nodebook_node_to_html(node: NotebookNode, output_path: str, full_width:bool = False) -> None:
+def convert_nodebook_node_to_html(node: NotebookNode, full_width:bool = False) -> str:
     normal_config = Config()
     normal_config.CustomCssPreprocessor.full_width = full_width
     normal_config.HTMLExporter.preprocessors = [CustomCssPreprocessor]
@@ -33,13 +33,9 @@ def export_nodebook_node_to_html(node: NotebookNode, output_path: str, full_widt
     report_config.TemplateExporter.exclude_input = True
     report_config.TemplateExporter.exclude_input_prompt = True
     report_config.TemplateExporter.exclude_output_prompt = True
-    report_config.TagRemovePreprocessor.remove_cell_tags = ("report_exclude",)
+    report_config.TagRemovePreprocessor.remove_cell_tags = ("report_exclude","injected-parameters")
     report_config.HTMLExporter.preprocessors = [TagRemovePreprocessor, CustomCssPreprocessor]
     html_exporter_report = HTMLExporter(config=report_config)
 
-    # content, _ = html_exporter.from_notebook_node(node)
-    # with open(f'{output_path}.src.html', 'w') as html_file:
-    #     html_file.write(content)
     content, _ = html_exporter_report.from_notebook_node(node)
-    with open(output_path, 'w') as html_file:
-        html_file.write(content)
+    return content
