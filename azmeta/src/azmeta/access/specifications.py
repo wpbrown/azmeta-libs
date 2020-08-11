@@ -2,6 +2,8 @@ from azure.common.client_factory import get_client_from_cli_profile
 from azure.mgmt.compute import ComputeManagementClient
 from azure.mgmt.compute.models import ResourceSku
 from typing import Dict, NamedTuple, Callable, Any, Mapping, Optional, Iterable, List, Collection
+from logging import Logger
+import re
 
 
 class VirtualMachineCapabilities(NamedTuple):
@@ -32,8 +34,11 @@ class VirtualMachineCapabilities(NamedTuple):
 
     @property
     def d_total_acus(self):
-        vcpus = self.vcpus_available if self.vcpus_available is not None else self.vcpus
-        return self.acus * vcpus
+        return self.acus * self.d_vcpus_available
+
+    @property
+    def d_vcpus_available(self):
+        return self.vcpus_available if self.vcpus_available is not None else self.vcpus
     
 
 class ManagedDiskCapabilities(NamedTuple):
@@ -95,9 +100,9 @@ class AzureComputeSpecifications:
         return self._managed_disk_skus[size.lower()]
 
 
-def load_compute_specifications() -> AzureComputeSpecifications:
+def load_compute_specifications(logger: Logger) -> AzureComputeSpecifications:
     client: ComputeManagementClient = get_client_from_cli_profile(ComputeManagementClient)
-    sku_pages: Iterable[ResourceSku] = client.resource_skus.list()
+    sku_pages: Iterable[ResourceSku] = client.resource_skus.list(filter="location eq 'eastus2'")
     specifications = AzureComputeSpecifications()
     for sku in sku_pages:
         if sku.resource_type not in ('virtualMachines', 'disks'):
@@ -112,6 +117,15 @@ def load_compute_specifications() -> AzureComputeSpecifications:
                 capabilities['EphemeralOSDiskSupported'] = 'False' 
             elif sku.family in ('standardDSv2PromoFamily', 'standardMSFamily'):
                 capabilities['EphemeralOSDiskSupported'] = 'True' 
+            
+            match_constrained = re.search(r'-(\d+)', sku.name)
+            if match_constrained is not None:
+                constraint = float(match_constrained[1])
+                vcpus = map_if_not_none(capabilities.get('vCPUs'), float)
+                vcpus_available = map_if_not_none(capabilities.get('vCPUsAvailable'), float)
+                if vcpus == vcpus_available or vcpus_available != constraint:
+                    logger.warning(f'Auto-corrected likely incorrect data from ARM from SKU {sku.name}. vcpus: {vcpus} avail: {vcpus_available}')
+                    capabilities['vCPUsAvailable'] = constraint
 
             if sku.name == 'Standard_E20_v3':
                 capabilities['HyperVGenerations'] = 'V1,V2'
