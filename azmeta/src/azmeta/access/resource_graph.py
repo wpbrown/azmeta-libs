@@ -1,4 +1,4 @@
-from azure.common.client_factory import get_client_from_cli_profile
+from azmeta.access.utils.sdk import default_sdk_client
 from azure.mgmt.resourcegraph import ResourceGraphClient
 from azure.mgmt.resourcegraph.models import QueryRequest, QueryRequestOptions, QueryResponse, ResultTruncated
 from typing import List, Iterable, Tuple, Any
@@ -31,7 +31,7 @@ _RESOURCE_GRAPH_TO_KUSTO_TYPE_MAP = {
 
 
 def _query_native(subscriptions: Iterable[str], query: str, max_pages) -> List[QueryResponse]:
-    client = get_client_from_cli_profile(ResourceGraphClient)
+    client = default_sdk_client(ResourceGraphClient)
     query_options = QueryRequestOptions()
     query_request = QueryRequest(subscriptions=realize_sequence(subscriptions), query=query, options=query_options)
     query_response: QueryResponse = client.resources(query_request)

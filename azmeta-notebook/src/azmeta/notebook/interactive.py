@@ -1,10 +1,15 @@
 from IPython import get_ipython, InteractiveShell
 from azmeta.access.config import direct
+from azmeta.access.context import AzmetaResourceContext, default_resource_context
 import confuse
 
 _billing_scope_template = {
     'accounts': confuse.StrSeq(split=False)
 }
+
+
+def resource_context() -> AzmetaResourceContext:
+    return default_resource_context()
 
 
 def connect_kqlmagic() -> None:

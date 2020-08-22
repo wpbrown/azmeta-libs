@@ -1,6 +1,6 @@
 from typing import NamedTuple, List, Any, Iterable, Union, Optional, Callable
 from pandas import DataFrame
-from azure.common.client_factory import get_azure_cli_credentials
+from azmeta.access.utils.sdk import default_sdk_client
 from azure.loganalytics import LogAnalyticsDataClient
 from azure.loganalytics.models import QueryBody
 from msrest.pipeline import ClientRawResponse
@@ -147,7 +147,7 @@ def _create_dataframe_result(data: dict, kusto_response: KustoResponseDataSet) -
 
 
 def _query_native(query: str, workspaces: Union[Iterable[str], str], timespan: Optional[str], timeout: int = None, retries: int = None) -> ClientRawResponse:
-    client = LogAnalyticsDataClient(get_azure_cli_credentials(resource='https://api.loganalytics.io/')[0])
+    client = default_sdk_client(LogAnalyticsDataClient, auth_resource="https://api.loganalytics.io/")
     client._deserialize = lambda x,y: None
     if isinstance(workspaces, str):
         workspaces_arg = None

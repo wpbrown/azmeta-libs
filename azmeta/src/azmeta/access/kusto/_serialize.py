@@ -1,3 +1,4 @@
+from datetime import date, datetime
 import json
 from pandas import DataFrame
 from typing import Any
@@ -11,6 +12,9 @@ def serialize_to_kql(value: Any) -> str:
     
     if isinstance(value, list) or isinstance(value, tuple):
         return f"dynamic({json.dumps(list(value))})"
+
+    if isinstance(value, datetime) or isinstance(value, date):
+        return f"datetime({value.isoformat()})"
 
     if isinstance(value, DataFrame):
         return _serialize_dataframe_to_kql(value)
