@@ -6,13 +6,15 @@ from inspect import getfullargspec
 T = TypeVar('T')
 
 
-def default_sdk_client(client_class: Type[T], auth_resource: Optional[str] = None) -> T:
+def default_sdk_client(client_class: Type[T], auth_resource: Optional[str] = None, subscription_id: Optional[str] = None) -> T:
     resource_context = default_resource_context()
     auth_context = default_authentication_context()
 
+    if subscription_id is None:    
+        subscription_id = resource_context.default_subscription.subscription_id
     credential = _SdkCredential(auth_context, auth_resource if auth_resource else "https://management.core.windows.net/")
     parameters = {
-        'subscription_id': resource_context.default_subscription.subscription_id,
+        'subscription_id': subscription_id,
         'credentials': credential,
         'credential': credential
     }

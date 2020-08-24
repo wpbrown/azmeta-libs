@@ -1,4 +1,4 @@
-from azure.common.client_factory import get_client_from_cli_profile
+from azmeta.access.utils.sdk import default_sdk_client
 from azure.mgmt.reservations import AzureReservationAPI
 from azure.mgmt.reservations.models import ReservationResponse
 from azure.mgmt.reservations.operations._reservation_operations import ReservationOperations
@@ -34,7 +34,7 @@ def reservations_dataframe() -> DataFrame:
     
 
 def _reservations_native() -> List[ReservationResponse]:
-    api: AzureReservationAPI = get_client_from_cli_profile(AzureReservationAPI)
+    api = default_sdk_client(AzureReservationAPI)
 
     try:
         original_url = ReservationOperations.list.metadata['url']

@@ -1,4 +1,4 @@
-from azure.common.client_factory import get_client_from_cli_profile
+from azmeta.access.utils.sdk import default_sdk_client
 from azure.mgmt.advisor import AdvisorManagementClient
 from azure.mgmt.advisor.models import ResourceRecommendationBase
 from typing import Iterable, Union, Iterable, Dict, List
@@ -8,7 +8,7 @@ def load_resize_recommendations(subscriptions: Union[str, Iterable[str]]) -> Dic
     target_subscriptions: Iterable[str] = [subscriptions] if isinstance(subscriptions, str) else subscriptions
 
     def get_iter_for_sub(subscription: str) ->  Iterable[ResourceRecommendationBase]:
-        client: AdvisorManagementClient = get_client_from_cli_profile(AdvisorManagementClient, subscription_id=subscription)
+        client = default_sdk_client(AdvisorManagementClient, subscription_id=subscription)
         return client.recommendations.list(filter="Category eq 'Cost'")
     
     recommendations = chain.from_iterable(get_iter_for_sub(s) for s in target_subscriptions)

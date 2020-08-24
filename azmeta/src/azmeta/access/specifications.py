@@ -1,4 +1,4 @@
-from azure.common.client_factory import get_client_from_cli_profile
+from azmeta.access.utils.sdk import default_sdk_client
 from azure.mgmt.compute import ComputeManagementClient
 from azure.mgmt.compute.models import ResourceSku
 from typing import Dict, NamedTuple, Callable, Any, Mapping, Optional, Iterable, List, Collection
@@ -101,7 +101,7 @@ class AzureComputeSpecifications:
 
 
 def load_compute_specifications(logger: Logger) -> AzureComputeSpecifications:
-    client: ComputeManagementClient = get_client_from_cli_profile(ComputeManagementClient)
+    client = default_sdk_client(ComputeManagementClient)
     sku_pages: Iterable[ResourceSku] = client.resource_skus.list(filter="location eq 'eastus2'")
     specifications = AzureComputeSpecifications()
     for sku in sku_pages:
