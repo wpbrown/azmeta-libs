@@ -28,7 +28,7 @@ certifi==2020.4.5.1       # via msrest, requests
 cffi==1.14.0              # via bcrypt, cryptography, pynacl
 chardet==3.0.4            # via requests
 colorama==0.4.3           # via azure-cli-core, knack
-cryptography==2.9.2       # via adal, paramiko, pyjwt, pyopenssl
+cryptography==3.2       # via adal, paramiko, pyjwt, pyopenssl
 decorator==4.4.2          # via traitlets
 defusedxml==0.6.0         # via nbconvert
 entrypoints==0.3          # via nbconvert
