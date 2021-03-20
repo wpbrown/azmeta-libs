@@ -37,7 +37,7 @@ idna==2.9                 # via requests
 importlib-metadata==1.6.0  # via argcomplete, jsonschema
 ipython-genutils==0.2.0   # via nbformat, traitlets
 isodate==0.6.0            # via msrest
-jinja2==2.11.2            # via nbconvert
+jinja2==2.11.3            # via nbconvert
 jmespath==0.10.0          # via azure-cli-core, knack
 jsonschema==3.2.0         # via nbformat
 jupyter-core==4.6.3       # via nbconvert, nbformat
