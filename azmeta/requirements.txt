@@ -24,7 +24,7 @@ azure-mgmt-resourcegraph==2.0.0  # via azmeta (setup.py)
 azure-nspkg==3.0.2        # via azure-cli-nspkg, azure-loganalytics
 bcrypt==3.1.7             # via paramiko
 bleach==3.1.5             # via nbconvert
-certifi==2020.4.5.1       # via msrest, requests
+certifi==2022.12.7       # via msrest, requests
 cffi==1.14.0              # via bcrypt, cryptography, pynacl
 chardet==3.0.4            # via requests
 colorama==0.4.3           # via azure-cli-core, knack
